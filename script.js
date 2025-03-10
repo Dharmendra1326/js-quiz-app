@@ -6,6 +6,7 @@ const questionText = document.getElementById("question-text");
 const optionsContainer = document.getElementById("options-container");
 const nextButton = document.getElementById("next-btn");
 const scoreText = document.getElementById("score-text");
+const timerText = document.getElementById("timer-text"); // Get red timer
 const restartButton = document.createElement("button");
 
 // Restart button setup
@@ -55,16 +56,14 @@ function loadQuestion() {
     startTimer();
 }
 
-// Start timer function
+// Start timer function (Fixed issue)
 function startTimer() {
     let timeLeft = 60;
-    const timerDisplay = document.createElement("p");
-    timerDisplay.id = "timer";
-    document.body.appendChild(timerDisplay);
+    timerText.textContent = `Time Left: ${timeLeft}s`; // Update red timer initially
 
     timer = setInterval(() => {
-        timerDisplay.textContent = `Time left: ${timeLeft} sec`;
         timeLeft--;
+        timerText.textContent = `Time Left: ${timeLeft}s`; // Update red timer
 
         if (timeLeft < 0) {
             clearInterval(timer);
