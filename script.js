@@ -1,122 +1,106 @@
-const questions = [
-    {
-        question: "Which keyword is used to declare a variable in JavaScript?",
-        options: ["var", "let", "const", "All of the above"],
-        correct: 3
-    },
-    {
-        question: "What is the output of `typeof null` in JavaScript?",
-        options: ["null", "undefined", "object", "string"],
-        correct: 2
-    },
-    {
-        question: "Which function is used to print something in the console?",
-        options: ["print()", "log()", "console.log()", "display()"],
-        correct: 2
-    },
-    {
-        question: "Which symbol is used for single-line comments in JavaScript?",
-        options: ["//", "/*", "#", "--"],
-        correct: 0
-    },
-    {
-        question: "Which operator is used to compare values AND types in JavaScript?",
-        options: ["==", "===", "!=", "!=="],
-        correct: 1
-    }
-];
-
-let shuffledQuestions = []; // Randomized questions store karne ke liye
+let questions = []; // Empty array for questions
 let currentQuestionIndex = 0;
 let score = 0;
 let timer;
-let timeLeft = 60; // Har question ke liye 60 second
-
 const questionText = document.getElementById("question-text");
 const optionsContainer = document.getElementById("options-container");
 const nextButton = document.getElementById("next-btn");
 const scoreText = document.getElementById("score-text");
-const timerText = document.getElementById("timer-text"); // Timer ka element
-const restartButton = document.createElement("button"); // Restart button
+const restartButton = document.createElement("button");
 
+// Restart button setup
 restartButton.textContent = "Restart Quiz";
-restartButton.style.display = "none"; 
+restartButton.style.display = "none";
 restartButton.onclick = restartQuiz;
-document.body.appendChild(restartButton); 
+document.body.appendChild(restartButton);
 
-// Questions ko random order me karne ka function
-function shuffleQuestions() {
-    shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+// Fetch random web development questions
+async function fetchQuestions() {
+    try {
+        const response = await fetch("https://opentdb.com/api.php?amount=10&category=18&type=multiple");
+        const data = await response.json();
+        questions = data.results.map((q) => ({
+            question: q.question,
+            options: [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5), // Randomize options
+            correct: q.correct_answer
+        }));
+        loadQuestion();
+    } catch (error) {
+        console.error("Error fetching questions:", error);
+        questionText.textContent = "Failed to load questions. Please try again.";
+    }
 }
 
-// Timer start karne ka function
+// Load question and start timer
+function loadQuestion() {
+    if (currentQuestionIndex >= questions.length) {
+        showScore();
+        return;
+    }
+
+    const currentQuestion = questions[currentQuestionIndex];
+    questionText.innerHTML = currentQuestion.question;
+    optionsContainer.innerHTML = "";
+    
+    currentQuestion.options.forEach((option) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option, currentQuestion.correct);
+        optionsContainer.appendChild(button);
+    });
+
+    nextButton.style.display = "none";
+    
+    // Start 60-second timer
+    startTimer();
+}
+
+// Start timer function
 function startTimer() {
-    timeLeft = 60;
-    timerText.textContent = `Time Left: ${timeLeft}s`;
+    let timeLeft = 60;
+    const timerDisplay = document.createElement("p");
+    timerDisplay.id = "timer";
+    document.body.appendChild(timerDisplay);
 
     timer = setInterval(() => {
+        timerDisplay.textContent = `Time left: ${timeLeft} sec`;
         timeLeft--;
-        timerText.textContent = `Time Left: ${timeLeft}s`;
 
-        if (timeLeft <= 0) {
+        if (timeLeft < 0) {
             clearInterval(timer);
-            nextQuestion(); // Agar time khatam ho gaya, next question
+            currentQuestionIndex++;
+            loadQuestion();
         }
     }, 1000);
 }
 
-// Question load karne ka function
-function loadQuestion() {
-    clearInterval(timer); // Purana timer stop kare
-    if (currentQuestionIndex < shuffledQuestions.length) {
-        const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        questionText.textContent = currentQuestion.question;
-        optionsContainer.innerHTML = "";
-
-        currentQuestion.options.forEach((option, index) => {
-            const button = document.createElement("button");
-            button.textContent = `${index + 1}. ${option}`;
-            button.style.display = "block"; 
-            button.onclick = () => checkAnswer(index);
-            optionsContainer.appendChild(button);
-        });
-
-        nextButton.style.display = "none"; 
-        startTimer(); // Har naye question pe timer start ho
-    } else {
-        showScore();
-    }
-}
-
-// Answer check karne ka function
-function checkAnswer(selectedIndex) {
-    if (selectedIndex === shuffledQuestions[currentQuestionIndex].correct) {
+// Check answer and move to next question
+function checkAnswer(selected, correct) {
+    clearInterval(timer);
+    if (selected === correct) {
         score++;
     }
     currentQuestionIndex++;
     loadQuestion();
 }
 
-// Score show karne ka function
+// Show final score
 function showScore() {
     questionText.textContent = "Quiz Completed!";
     optionsContainer.innerHTML = "";
     nextButton.style.display = "none";
-    scoreText.textContent = `Your Score: ${score} / ${shuffledQuestions.length}`;
-    restartButton.style.display = "block"; 
-    clearInterval(timer);
+    scoreText.textContent = `Your Score: ${score} / ${questions.length}`;
+    restartButton.style.display = "block";
 }
 
-// Quiz restart karne ka function
+// Restart quiz
 function restartQuiz() {
-    shuffleQuestions();
     currentQuestionIndex = 0;
     score = 0;
-    restartButton.style.display = "none"; 
+    restartButton.style.display = "none";
     scoreText.textContent = "";
-    loadQuestion();
+    fetchQuestions();
 }
 
-// Pehle questions shuffle karo aur quiz start karo
-shuffleQuestions();
-loadQuestion();
+// Start fetching questions
+fetchQuestions();
