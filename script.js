@@ -2,11 +2,12 @@ let questions = []; // Empty array for questions
 let currentQuestionIndex = 0;
 let score = 0;
 let timer;
+
 const questionText = document.getElementById("question-text");
 const optionsContainer = document.getElementById("options-container");
 const nextButton = document.getElementById("next-btn");
 const scoreText = document.getElementById("score-text");
-const timerText = document.getElementById("timer-text"); // Get red timer
+const progressBar = document.getElementById("progress-bar"); // Progress bar
 const restartButton = document.createElement("button");
 
 // Restart button setup
@@ -25,6 +26,7 @@ async function fetchQuestions() {
             options: [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5), // Randomize options
             correct: q.correct_answer
         }));
+        progressBar.max = questions.length; // Set progress bar max value
         loadQuestion();
     } catch (error) {
         console.error("Error fetching questions:", error);
@@ -46,24 +48,24 @@ function loadQuestion() {
     currentQuestion.options.forEach((option) => {
         const button = document.createElement("button");
         button.textContent = option;
-        button.onclick = () => checkAnswer(option, currentQuestion.correct);
+        button.onclick = () => checkAnswer(button, option, currentQuestion.correct);
         optionsContainer.appendChild(button);
     });
 
     nextButton.style.display = "none";
-    
-    // Start 60-second timer
+    progressBar.value = currentQuestionIndex; // Update progress bar
     startTimer();
 }
 
-// Start timer function (Fixed issue)
+// Start timer function
 function startTimer() {
     let timeLeft = 60;
-    timerText.textContent = `Time Left: ${timeLeft}s`; // Update red timer initially
+    const timerDisplay = document.getElementById("timer-text");
 
+    clearInterval(timer); // Clear previous timer
     timer = setInterval(() => {
+        timerDisplay.textContent = `Time Left: ${timeLeft}s`;
         timeLeft--;
-        timerText.textContent = `Time Left: ${timeLeft}s`; // Update red timer
 
         if (timeLeft < 0) {
             clearInterval(timer);
@@ -74,13 +76,27 @@ function startTimer() {
 }
 
 // Check answer and move to next question
-function checkAnswer(selected, correct) {
+function checkAnswer(button, selected, correct) {
     clearInterval(timer);
+
+    // Disable all buttons after selection
+    [...optionsContainer.children].forEach((btn) => {
+        btn.disabled = true;
+        if (btn.textContent === correct) {
+            btn.classList.add("correct"); // Correct answer green
+        } else if (btn.textContent === selected) {
+            btn.classList.add("wrong"); // Wrong answer red
+        }
+    });
+
     if (selected === correct) {
         score++;
     }
-    currentQuestionIndex++;
-    loadQuestion();
+
+    setTimeout(() => {
+        currentQuestionIndex++;
+        loadQuestion();
+    }, 2000); // Move to next question after 2 sec
 }
 
 // Show final score
