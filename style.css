@@ -25,7 +25,7 @@ h1 {
 }
 
 button {
-    background-color: red;
+    background-color: rgb(221, 15, 152);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -35,7 +35,7 @@ button {
 }
 
 button:hover {
-    background-color: darkblue;
+    background-color: rgb(94, 94, 223);
 }
 button {
     display: block; /* Saare options ek ek line me aayenge */
