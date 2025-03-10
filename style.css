@@ -24,6 +24,13 @@ h1 {
     margin-top: 10px;
 }
 
+#timer-text {
+    font-size: 18px;
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
 button {
     background-color: rgb(30, 148, 54);
     color: white;
@@ -32,19 +39,8 @@ button {
     cursor: pointer;
     margin-top: 10px;
     border-radius: 5px;
-}
-
-button:hover {
-    background-color: rgb(94, 94, 223);
-}
-button {
     display: block; 
     width: 100%; 
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    border: none;
 }
 
 button:hover {
