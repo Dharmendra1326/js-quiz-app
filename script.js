@@ -19,7 +19,7 @@ document.body.appendChild(restartButton);
 // Fetch random web development questions
 async function fetchQuestions() {
     try {
-        const response = await fetch("https://opentdb.com/api.php?amount=10&category=19&difficulty=easy&type=multiple");
+        const response = await fetch("https://opentdb.com/api.php?amount=10&category=28&difficulty=easy&type=multiple");
         const data = await response.json();
         questions = data.results.map((q) => ({
             question: q.question,
